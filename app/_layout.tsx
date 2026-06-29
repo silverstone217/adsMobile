@@ -1,24 +1,69 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { useUserStore } from "@/lib/store";
+import { COLORS } from "@/utils/theme";
+import { ensureAudioDirectory } from "@/utils/fileManager"; // <--- Importez la fonction ici
+import {
+  Lato_100Thin,
+  Lato_300Light,
+  Lato_400Regular,
+  Lato_700Bold,
+  Lato_900Black,
+  useFonts,
+} from "@expo-google-fonts/lato";
+import { router, Stack } from "expo-router";
+import { useEffect } from "react";
+import { StatusBar, View } from "react-native";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  let [fontsLoaded] = useFonts({
+    Lato_100Thin,
+    Lato_300Light,
+    Lato_400Regular,
+    Lato_700Bold,
+    Lato_900Black,
+  });
+
+  const token = useUserStore((state) => state.token);
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (!fontsLoaded) return;
+
+    const initApp = async () => {
+      try {
+        // Crée le dossier unique proprement au démarrage
+        await ensureAudioDirectory();
+      } catch (e) {
+        // Gérer l'échec de la création du dossier si nécessaire
+        console.error("Impossible d'initialiser l'espace de stockage", e);
+      }
+
+      if (!token || !isAuthenticated) {
+        router.replace("/");
+      } else {
+        router.replace("/home");
+      }
+    };
+
+    initApp();
+  }, [fontsLoaded, token, isAuthenticated]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: COLORS.background },
+        }}
+      />
+      <StatusBar
+        animated
+        barStyle="light-content"
+        backgroundColor={COLORS.background}
+      />
+    </View>
   );
 }
