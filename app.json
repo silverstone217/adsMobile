@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Adsmob",
-    "slug": "Adsmob",
+    "name": "Sango",
+    "slug": "sango",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "adsmob",
+    "scheme": "adsmob", // keep adsmob for ios and android, otherwise the app will not open from the link
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
@@ -44,7 +44,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/android-splash.png",
+          "image": "./assets/images/ios-splash.png",
           "imageWidth": 200,
           "resizeMode": "center",
           "backgroundColor": "#000000",
@@ -57,7 +57,7 @@
             "backgroundColor": "#000000"
           },
           "android": {
-            "image": "./assets/images/android-splash.png",
+            "image": "./assets/images/ios-splash.png",
             "backgroundColor": "#000000"
           }
         }

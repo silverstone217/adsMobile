@@ -1,6 +1,6 @@
 import { useUserStore } from "@/lib/store";
-import { COLORS } from "@/utils/theme";
 import { ensureAudioDirectory } from "@/utils/fileManager"; // <--- Importez la fonction ici
+import { COLORS } from "@/utils/theme";
 import {
   Lato_100Thin,
   Lato_300Light,
@@ -10,8 +10,11 @@ import {
   useFonts,
 } from "@expo-google-fonts/lato";
 import { router, Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar, View } from "react-native";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   let [fontsLoaded] = useFonts({
@@ -29,18 +32,23 @@ export default function RootLayout() {
     if (!fontsLoaded) return;
 
     const initApp = async () => {
-      try {
-        // Crée le dossier unique proprement au démarrage
-        await ensureAudioDirectory();
-      } catch (e) {
-        // Gérer l'échec de la création du dossier si nécessaire
-        console.error("Impossible d'initialiser l'espace de stockage", e);
-      }
+      const start = Date.now();
 
-      if (!token || !isAuthenticated) {
-        router.replace("/");
-      } else {
-        router.replace("/home");
+      try {
+        await ensureAudioDirectory();
+
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, 5000 - elapsed);
+
+        await new Promise((resolve) => setTimeout(resolve, remaining));
+
+        if (!token || !isAuthenticated) {
+          router.replace("/");
+        } else {
+          router.replace("/home");
+        }
+      } finally {
+        await SplashScreen.hideAsync();
       }
     };
 
