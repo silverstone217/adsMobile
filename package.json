@@ -9,7 +9,9 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "buildA": "npx eas build -p android --profile preview"
+    "buildAE": "npx eas build -p android --profile preview",
+    "buildAab": "gradlew bundleRelease",
+    "buildApk": "./gradlew assembleRelease"
   },
   "dependencies": {
     "@expo-google-fonts/lato": "^0.4.1",

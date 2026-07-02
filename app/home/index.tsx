@@ -47,7 +47,7 @@ export default function Home() {
 
   // 🔥 ÉTAT DU VOLUME (100% = 1.0)
   const [currentVolume, setCurrentVolume] = useState(1.0);
-  const VolumePrefered = 0.7;
+  const VolumePrefered = 0.3;
 
   // 🗓️ 1. VÉRIFICATION STRICTE DE LA VALIDITÉ DE LA CAMPAGNE
   const campaign = useMemo(() => {
@@ -55,11 +55,13 @@ export default function Home() {
     if (!currentCampaign.audios || currentCampaign.audios.length === 0)
       return null;
 
-    const start = new Date(currentCampaign.startDate).getTime();
-    const durationWeeks = currentCampaign.duration || 0;
-    const expirationTime = start + durationWeeks * 7 * 24 * 60 * 60 * 1000;
+    const startDate = new Date(currentCampaign.startDate);
+    const expirationDate = new Date(startDate);
+    expirationDate.setDate(
+      expirationDate.getDate() + (currentCampaign.duration || 0),
+    );
 
-    if (Date.now() > expirationTime) {
+    if (Date.now() > expirationDate.getTime()) {
       return null;
     }
 
@@ -377,8 +379,6 @@ export default function Home() {
             timeout: 10000,
           },
         );
-
-        console.log("NOT INFINITE LOOP!!");
 
         if (!data.exists) {
           console.log("Campagne supprimée du serveur.");

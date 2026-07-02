@@ -1,5 +1,5 @@
 import { useUserStore } from "@/lib/store";
-import { ensureAudioDirectory } from "@/utils/fileManager"; // <--- Importez la fonction ici
+import { ensureAudioDirectory } from "@/utils/fileManager";
 import { COLORS } from "@/utils/theme";
 import {
   Lato_100Thin,
@@ -14,7 +14,18 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar, View } from "react-native";
 
+// On empêche le splash de se cacher automatiquement au démarrage
 SplashScreen.preventAutoHideAsync();
+
+// Note : Avec Expo SDK 54, la configuration de la durée ici sert principalement
+// à l'animation de sortie (fade). Le blocage réel se fait dans le useEffect.
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
+
+// Définissez ici le temps total souhaité en millisecondes (ex: 5000 pour 5s, 10000 pour 10s)
+const SPLASH_DURATION = 5000;
 
 export default function RootLayout() {
   let [fontsLoaded] = useFonts({
@@ -29,25 +40,35 @@ export default function RootLayout() {
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
   useEffect(() => {
+    // On attend absolument que les polices soient prêtes avant de lancer le chrono de la logique
     if (!fontsLoaded) return;
 
     const initApp = async () => {
       const start = Date.now();
 
       try {
+        // Vos tâches asynchrones (ex: création de dossier)
         await ensureAudioDirectory();
 
+        // Calcul du temps écoulé pendant les tâches
         const elapsed = Date.now() - start;
-        const remaining = Math.max(0, 5000 - elapsed);
+        // On force l'attente jusqu'à atteindre la durée cible (SPLASH_DURATION)
+        const remaining = Math.max(0, SPLASH_DURATION - elapsed);
 
-        await new Promise((resolve) => setTimeout(resolve, remaining));
+        if (remaining > 0) {
+          await new Promise((resolve) => setTimeout(resolve, remaining));
+        }
 
+        // Redirection vers le bon écran (l'écran change en tâche de fond)
         if (!token || !isAuthenticated) {
           router.replace("/");
         } else {
           router.replace("/home");
         }
+      } catch (error) {
+        console.error("Erreur lors de l'initialisation :", error);
       } finally {
+        // C'est SEULEMENT ici, après l'attente forcée et la redirection, qu'on cache le Splash Screen
         await SplashScreen.hideAsync();
       }
     };

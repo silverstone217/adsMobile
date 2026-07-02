@@ -1,7 +1,7 @@
-import { Directory, Paths, File } from "expo-file-system";
-import { useAudioStore, Audio, Campaign, useUserStore } from "@/lib/store";
-import { API_URL } from "./envVariables";
+import { Audio, Campaign, useAudioStore, useUserStore } from "@/lib/store";
 import axios from "axios";
+import { Directory, File, Paths } from "expo-file-system";
+import { API_URL } from "./envVariables";
 
 // Définir le chemin vers votre dossier unique d'audios
 export const getAudioDirectory = () => {
@@ -133,13 +133,11 @@ export const syncCampaignAudios = async (
   const audioDir = getAudioDirectory();
 
   // 1. Calcul des dates
-  const start = new Date(campaign.startDate);
+  const start = new Date(campaign.startDate); // per days
   const now = new Date();
 
-  // duration est en semaines, on ajoute (weeks * 7 * 24 * 60 * 60 * 1000)ms
-  const end = new Date(
-    start.getTime() + campaign.duration * 7 * 24 * 60 * 60 * 1000,
-  );
+  const end = new Date(start);
+  end.setDate(end.getDate() + campaign.duration);
 
   const isExpired = now > end;
 
